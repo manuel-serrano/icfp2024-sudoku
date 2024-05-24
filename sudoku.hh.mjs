@@ -4,7 +4,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Fri May 24 16:11:19 2024 (serrano)                */
+/*    Last change :  Fri May 24 16:47:45 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -18,8 +18,8 @@ import * as hh from "@hop/hiphop";
 import * as boards9x9 from "./boards9x9.mjs";
 import "./set.mjs";
 import {
-   BOARD_SIZE, iota, digits, margins, i
-   nitGame, displayBoard, checkSolution } from "./utils.mjs";
+   BOARD_SIZE, iota, digits, margins,
+   initGame, displayBoard, checkSolution } from "./utils.mjs";
 
 export {
    Sudoku, SudokuNakedSingle, SudokuHiddenSingle, SudokuNakedPair, solve, step

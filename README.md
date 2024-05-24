@@ -70,11 +70,13 @@ Running the artifact without a VM
 Install the artifact:
 
 ```
-npm install https://github.com/manuel-serrano/icfp2024-sudoku.git
+git clone https://github.com/manuel-serrano/icfp2024-sudoku.git
+cd icfp2024-sudoku
+npm install
 ```
 
 To run it:
 
 ```
-(cd node_modules/icfp2024-sudoku; npm run sudoku)
+npm run sudoku
 ```
