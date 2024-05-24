@@ -67,7 +67,16 @@ solve([SudokuNakedSingle], myBoard);
 Running the artifact without a VM
 =================================
 
-Install the artifact:
+Requirements
+------------
+
+  - `git`
+  - `nodejs`
+  - `npm`
+  
+  
+Installation
+------------
 
 ```
 git clone https://github.com/manuel-serrano/icfp2024-sudoku.git
@@ -75,7 +84,8 @@ cd icfp2024-sudoku
 npm install
 ```
 
-To run it:
+Running
+-------
 
 ```
 npm run sudoku
