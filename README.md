@@ -22,5 +22,5 @@ Running the artifact without a VM
 Install the artifact:
 
 ```
-npm install 
+npm install https://github.com/manuel-serrano/icfp2024-sudoku.git
 ```
