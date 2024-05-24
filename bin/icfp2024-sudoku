@@ -1,3 +1,0 @@
-#!/usr/bin/env -S node --enable-source-maps --no-warnings --loader ../node_modules/@hop/hiphop/lib/hiphop-loader.mjs
-
-import "../test.hh.mjs";

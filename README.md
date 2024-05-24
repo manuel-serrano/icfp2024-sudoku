@@ -13,7 +13,7 @@ The files composing the artifact are:
 To run the artifact:
 
 ```
-npm run test
+npm run sudoku
 ```
 
 Running the artifact without a VM
@@ -23,4 +23,10 @@ Install the artifact:
 
 ```
 npm install https://github.com/manuel-serrano/icfp2024-sudoku.git
+```
+
+To run it:
+
+```
+(cd node_modules/icfp2024-sudoku; npm run sudoku)
 ```
