@@ -1,0 +1,31 @@
+name: icfp2024-sudoku CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        architecture: 'x64'
+        distribution: 'full'
+        variant: 'CS'
+        version: 'stable'
+        snapshot_site: 'auto'
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install
+    - run: npm run sudoku

@@ -1,10 +1,10 @@
 // -*- Mode: typescript; typescript-indent-level: 3; indent-tabs-mode: nil -*-
 /*=====================================================================*/
-/*    serrano/diffusion/article/hiphop-sudoku-pearl/sudoku.hh.mjs      */
+/*    serrano/diffusion/article/icfp2024-sudoku/sudoku.hh.mjs          */
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Wed Mar 27 15:59:15 2024 (serrano)                */
+/*    Last change :  Fri May 24 16:11:19 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -15,9 +15,15 @@
 /*    The module                                                       */
 /*---------------------------------------------------------------------*/
 import * as hh from "@hop/hiphop";
-import "./set.mjs";
-import { BOARD_SIZE, iota, digits, margins, initGame, displayBoard, checkSolution } from "./utils.mjs";
 import * as boards9x9 from "./boards9x9.mjs";
+import "./set.mjs";
+import {
+   BOARD_SIZE, iota, digits, margins, i
+   nitGame, displayBoard, checkSolution } from "./utils.mjs";
+
+export {
+   Sudoku, SudokuNakedSingle, SudokuHiddenSingle, SudokuNakedPair, solve, step
+}
 
 /*---------------------------------------------------------------------*/
 /*    verbose                                                          */
@@ -28,15 +34,15 @@ let verbose = 1;
 /*    Interfaces ...                                                   */
 /*---------------------------------------------------------------------*/
 const inconsistent = (must, cannot) => {
-   return must.size > 1 ||
-          must.intersection(cannot).size > 0;
+   return must.size > 1 || must.intersection(cannot).size > 0;
 }
 
 /*---------------------------------------------------------------------*/
-/*    mach ...                                                         */
+/*    Sudoku ...                                                       */
+/*    -------------------------------------------------------------    */
+/*    The Sudoku main program generator.                               */
 /*---------------------------------------------------------------------*/
-export
-const SudokuMachine = strategies => hiphop module() {
+const Sudoku = strategies => hiphop module() {
    inout ... ${iota.flatMap(i => iota.map(j => `must${i}${j}`))} =
       new Set() combine (x, y) => x.union(y);
    inout ... ${iota.flatMap(i => iota.map(j => `cannot${i}${j}`))} =
@@ -125,8 +131,9 @@ const ForkHouseMap = proc => hiphop {
          const i0 = chute_len * (i % chute_len);
          const j0 = chute_len * Math.floor(i / chute_len);
          return proc(iota.map(j => {
-            return {i : i0 + j % chute_len,
-                    j : j0 + Math.floor(j * chute_len / iota.length)};
+            return {
+               i : i0 + j % chute_len,
+               j : j0 + Math.floor(j * chute_len / iota.length)};
          }))})}
    }
 }
@@ -154,14 +161,14 @@ const MustThisCannot = () => hiphop {
          }
          yield;
       }
-   })})}}
+   })})}
+}
 
 /*---------------------------------------------------------------------*/
 /*    SudokuNakedSingle ...                                            */
 /*    -------------------------------------------------------------    */
 /*    https://hodoku.sourceforge.net/en/tech_singles.php               */
 /*---------------------------------------------------------------------*/
-export
 const SudokuNakedSingle = hiphop {
    fork ${iota.map(i => hiphop fork ${iota.map(j => hiphop {
       done: {
@@ -172,7 +179,8 @@ const SudokuNakedSingle = hiphop {
       yield;
       let must = digits.difference(this[`cannot${i}${j}`].preval);
       sustain ${`must${i}${j}`}(must);
-   })})}};
+   })})}
+};
 
 
 /*---------------------------------------------------------------------*/
@@ -180,7 +188,6 @@ const SudokuNakedSingle = hiphop {
 /*    -------------------------------------------------------------    */
 /*    https://hodoku.sourceforge.net/en/tech_singles.php               */
 /*---------------------------------------------------------------------*/
-export
 const SudokuHiddenSingle = hiphop ${ForkHouseMap(coords => hiphop {
    loop {
       ${coords.map(ignored => hiphop {
@@ -197,14 +204,13 @@ const SudokuHiddenSingle = hiphop ${ForkHouseMap(coords => hiphop {
          }
       })};
       yield;
-   }})}
+   }})};
 
 /*---------------------------------------------------------------------*/
 /*    SudokuNakedPair ...                                              */
 /*    -------------------------------------------------------------    */
 /*    https://hodoku.sourceforge.net/en/tech_naked.php                 */
 /*---------------------------------------------------------------------*/
-export 
 const SudokuNakedPair = hiphop ${ForkHouseMap(coords => hiphop {
    fork ${coords.map(c => hiphop {
       loop {
@@ -224,21 +230,17 @@ const SudokuNakedPair = hiphop ${ForkHouseMap(coords => hiphop {
                               digits.difference(c_cannot));
                         })}}})}}
          yield;
-      }})}})}
+      }})}})};
 
 /*---------------------------------------------------------------------*/
-/*    guessNum                                                         */
+/*    driver ...                                                       */
 /*---------------------------------------------------------------------*/
-let guessNum = 0;
-
-/*---------------------------------------------------------------------*/
-/*    sudoku ...                                                       */
-/*---------------------------------------------------------------------*/
-var depth = 0;
-// not exported because the management of the `depth` var is local to this file
 const driver = (mach, givens) => {
    while (true) {
+      // run one HipHop reaction and...
       const signals = mach.react(givens);
+
+      // ... check the resolution status
       switch (signals.status) {
          case "progress":
             break;
@@ -248,18 +250,22 @@ const driver = (mach, givens) => {
 
             for (let d of digits) {
                newGivens[`must${i}${j}`] = new Set([d]);
-               guessNum++; if (verbose > 0) { console.log(margins[depth] + `guessing ${i}x${j} val=${d}/{${digits.array()}} [${guessNum}:${depth}]`); depth+=1; }
+               mach.guessNum++;
+               if (verbose > 0) {
+                  console.log(margins[mach.depth] + `guessing ${i}x${j} val=${d}/{${digits.array()}} [${mach.guessNum}:${mach.depth}]`); mach.depth+=1;
+               }
                const newSignals = driver(mach, newGivens);
-               depth-=1; // console.log is here to make this line not appear in the paper
+               
+               mach.depth-=1;
                if (newSignals.status === "solved") {
                   return newSignals;
                } else {
                   mach.react({reset: true});
                }
             }
-            if (verbose > 0) { // console.log("hide this line to the paper");
-               console.log(margins[depth] +`guess ${i}x${j} REJECT ${signals.unsolved.size}/${iota.length * iota.length}`);
-            } // console.log("hide this line to the paper");
+            if (verbose > 0) {
+               console.log(margins[mach.depth] +`guess ${i}x${j} REJECT ${signals.unsolved.size}/${iota.length * iota.length}`);
+            }
             return {status: "reject"};
 
          case "solved":
@@ -270,27 +276,22 @@ const driver = (mach, givens) => {
 }
 
 /*---------------------------------------------------------------------*/
-/*    resetDriver ...                                                  */
-/*---------------------------------------------------------------------*/
-export function resetDriver(mach, givens) {
-   verbose = 0;
-   guessNum = 0;
-   const signals = driver(mach, givens);
-   return { guesses: guessNum, signals };
-}
-
-/*---------------------------------------------------------------------*/
 /*    solve ...                                                        */
+/*    -------------------------------------------------------------    */
+/*    Try to solve the whole board, that is run until either           */
+/*    completion or an error.                                          */
 /*---------------------------------------------------------------------*/
-export const solve = (strategies, board) => {
+const solve = (strategies, board) => {
    console.log("----------------------");
-   console.log("strategies", strategies.map(x => x.loc.pos)); // would be nice to have line/column but at least we have the position!
+   console.log("strategies", strategies.map(x => x.loc.pos));
    const sweep = false;
-   const mach = new hh.ReactiveMachine(SudokuMachine(strategies), { sweep, verbose: parseInt(process.env?.VERBOSE ?? "1") });
+   const mach = new hh.ReactiveMachine(Sudoku(strategies), { sweep, verbose: parseInt(process.env?.VERBOSE ?? "1") });
+   mach.depth = 0;
+   mach.guessNum = 0;
+   
    const givens = initGame(board);
    displayBoard(givens);
-   guessNum = 0;
-   depth=0;
+
    let signals = driver(mach, givens);
 
    if (signals.status === "solved") {
@@ -312,14 +313,18 @@ export const solve = (strategies, board) => {
 
 /*---------------------------------------------------------------------*/
 /*    step                                                             */
+/*    -------------------------------------------------------------    */
+/*    Run one step and stop.                                           */
 /*---------------------------------------------------------------------*/
-export const step = (mach, board, verbose) => {
+const step = (mach, board, verbose) => {
    const givens = initGame(board);
    if (verbose) {
       displayBoard(givens);
    }
-   guessNum = 0;
-   depth=0;
+   
+   mach.guessNum = 0;
+   mach.depth=0;
+   
    let signals = mach.react(givens);
    let initsize = signals.unsolved.size;
    let res = 0;
@@ -334,9 +339,3 @@ export const step = (mach, board, verbose) => {
    }
    return res;
 }
-
-if (process.env?.TRYBOARD) {
-   step(new hh.ReactiveMachine(SudokuMachine([SudokuNakedSingle])),boards9x9.paper, true);
-}
-
-// TRYBOARD=true NODE_OPTIONS="--enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs" node sudoku.hh.mjs

@@ -1,5 +1,7 @@
 The Functional, the Imperative, and the Sudoku (ICFP 2024 artifact)
 ===================================================================
+![branch workflow](https://github.com/manuel-serrano/icfp2024-sudoku/actions/workflows/icfp2024-sudoku.yml/badge.svg)
+
 
 The files composing the artifact are:
 
