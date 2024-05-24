@@ -2,7 +2,7 @@
    "name": "icfp2024-sudoku",
    "version": "1.0.0",
    "bin": {
-      "./bin/icfp2024-sudoku"
+      "icfp2024-sudoku": "./bin/icfp2024-sudoku"
    },
    "type": "module",
    "dependencies": {
