@@ -4,7 +4,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Fri May 24 16:47:45 2024 (serrano)                */
+/*    Last change :  Mon May 27 10:04:28 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -152,6 +152,9 @@ const MustOtherCannot = coords => hiphop {
    })}
 }
 
+/*---------------------------------------------------------------------*/
+/*    MustThisCannot ...                                               */
+/*---------------------------------------------------------------------*/
 const MustThisCannot = () => hiphop {
    fork ${iota.map(i => hiphop fork ${iota.map (j => hiphop {
       loop {
