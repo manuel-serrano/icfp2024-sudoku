@@ -15,7 +15,7 @@ This artifact can be installed and ran either:
 ### VM-base artifact
 
 To execute the artifact, install QEMU and run the virtual machine as
-instructed in Section [QEMU Instructions](QEMU Instructions). Once
+instructed in Section [QEMU Instructions] (see below). Once
 connected to the VM go into the `icfp-2024` directory and execute:
 
 ```
@@ -81,7 +81,7 @@ The HipHop implementation of the Sudoku solver sits in the file
   As `solve` but only execute one resolution step.
   
   
-The file 'board9x9.mjs` exports some Sudoku problems. Each
+The file `board9x9.mjs` exports some Sudoku problems. Each
 problem is a JavaScript string of 9 lines or 9 columns.
 Each character is either a digit between 1 and 9 or
 the character `.`. https://sudoku.com/ is a large Sudoku database
@@ -189,10 +189,10 @@ involved in a strategy. For instance
 
 All HipHop strategies comply with the same protocol:
 
-  1- There are implemented as independent HipHop fragment that run in
+  1. There are implemented as independent HipHop fragment that run in
   parallel with one another;
-  2- They read the `cannot` and `must`;
-  3- They either emit new `cannot`, `new `must`, or both.
+  2. They read the `cannot` and `must`;
+  3. They either emit new `cannot`, `new `must`, or both.
   
 If a strategy has to emit the same sets of signals as the one it reads, 
 in order to avoid causality cycles, it has to `yield` for one reaction.
