@@ -1,5 +1,5 @@
 /*=====================================================================*/
-/*    serrano/diffusion/article/hiphop-sudoku-pearl/boards9x9.mjs      */
+/*    serrano/diffusion/article/icfp2024-sudoku/boards9x9.mjs          */
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano                                    */
 /*    Creation    :  Sat Dec 23 07:18:11 2023                          */

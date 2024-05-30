@@ -1,15 +1,14 @@
 // -*- Mode: typescript; typescript-indent-level: 3; indent-tabs-mode: nil -*-
 /*=====================================================================*/
-/*    serrano/diffusion/article/hiphop-sudoku-pearl/utils.mjs          */
+/*    serrano/diffusion/article/icfp2024-sudoku/utils.mjs              */
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:22:03 2023                          */
-/*    Last change :  Fri Feb 16 08:35:18 2024 (serrano)                */
+/*    Last change :  Wed May 29 11:01:18 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Utilities for building and displaying SUDOKU boards.             */
 /*=====================================================================*/
-
 import "./set.mjs";
 
 /*---------------------------------------------------------------------*/
@@ -24,9 +23,19 @@ const digits = new Set(iota.map(v => v + 1));
 export let margins = [];
 
 /*---------------------------------------------------------------------*/
-/*    initGame ...                                                     */
+/*    initMargins ...                                                  */
 /*---------------------------------------------------------------------*/
-export function initGame(board) {
+export function initMargins() {
+   margins = new Array(iota.length * iota.length);
+   for (let i = 0; i < iota.length * iota.length; i++) {
+      margins[i]= new Array(i).fill(".").join("");
+   }
+}
+
+/*---------------------------------------------------------------------*/
+/*    initGameSafe ...                                                 */
+/*---------------------------------------------------------------------*/
+export function initGameSafe(board) {
    const rows = board.split("\n")
       .filter(l => !l.match(/^[ \t]*$/))
       .map(s => s.trim());
@@ -51,6 +60,24 @@ export function initGame(board) {
       }))
       return givens;
    }
+}
+
+/*---------------------------------------------------------------------*/
+/*    parseBoard ...                                                   */
+/*---------------------------------------------------------------------*/
+export
+function parseBoard(board) {
+   const rows = board.split("\n")
+                     .filter(l => !l.match(/^[ \t]*$/))
+                     .map(s => s.trim());
+   const givens = {};
+   
+   iota.forEach(i => iota.forEach(j => {
+      if (rows[j][i] !== ".") {
+         givens[`must${i}${j}`] = new Set([parseInt(rows[j][i])]);
+      }}));
+   
+   return givens;
 }
 
 /*---------------------------------------------------------------------*/

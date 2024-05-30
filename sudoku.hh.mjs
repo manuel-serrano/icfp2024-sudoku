@@ -4,7 +4,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Mon May 27 10:04:28 2024 (serrano)                */
+/*    Last change :  Wed May 29 10:35:32 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -19,7 +19,7 @@ import * as boards9x9 from "./boards9x9.mjs";
 import "./set.mjs";
 import {
    BOARD_SIZE, iota, digits, margins,
-   initGame, displayBoard, checkSolution } from "./utils.mjs";
+   initMargins, parseBoard, displayBoard, checkSolution } from "./utils.mjs";
 
 export {
    Sudoku, SudokuNakedSingle, SudokuHiddenSingle, SudokuNakedPair, solve, step
@@ -42,7 +42,7 @@ const inconsistent = (must, cannot) => {
 /*    -------------------------------------------------------------    */
 /*    The Sudoku main program generator.                               */
 /*---------------------------------------------------------------------*/
-const Sudoku = strategies => hiphop module() {
+const Sudoku = plugins => hiphop module() {
    inout ... ${iota.flatMap(i => iota.map(j => `must${i}${j}`))} =
       new Set() combine (x, y) => x.union(y);
    inout ... ${iota.flatMap(i => iota.map(j => `cannot${i}${j}`))} =
@@ -60,7 +60,7 @@ const Sudoku = strategies => hiphop module() {
          } par {
             ${SudokuObserver()};
          } par {
-            fork ${strategies}
+            fork ${plugins}
          }
       }
 
@@ -100,7 +100,7 @@ const SudokuObserver = () => hiphop {
             }
             if ((this[`must${i}${j}`].nowval.size >
                  this[`must${i}${j}`].preval.size) ||
-                (this[`cannot${i}${j}`].nowval.size <
+                (this[`cannot${i}${j}`].nowval.size >
                  this[`cannot${i}${j}`].preval.size)) {
                emit progress(true);
             }
@@ -122,9 +122,9 @@ const SudokuObserver = () => hiphop {
 /*---------------------------------------------------------------------*/
 const ForkHouseMap = proc => hiphop {
    fork {
-      fork ${iota.map(i => proc(iota.map(j => { return {i, j}})))}
+      fork ${iota.map(i => proc(iota.map(j => { return {i, j} })))}
    } par {
-      fork ${iota.map(j => proc(iota.map(i => { return {i, j}})))}
+      fork ${iota.map(j => proc(iota.map(i => { return {i, j} })))}
    } par {
       fork ${iota.map(i => {
          const chute_len = Math.sqrt(iota.length);
@@ -176,14 +176,12 @@ const SudokuNakedSingle = hiphop {
    fork ${iota.map(i => hiphop fork ${iota.map(j => hiphop {
       done: {
          loop {
-            if (this[`cannot${i}${j}`].nowval.size === digits.size - 1)
+            if (this[`cannot${i}${j}`].preval.size === digits.size - 1)
                break done
             yield;}}
-      yield;
       let must = digits.difference(this[`cannot${i}${j}`].preval);
       sustain ${`must${i}${j}`}(must);
-   })})}
-};
+   })})}};
 
 
 /*---------------------------------------------------------------------*/
@@ -251,12 +249,9 @@ const driver = (mach, givens) => {
             const { i, j, digits } = signals.unsolved.first();
             const newGivens = Object.assign({}, givens);
 
-            for (let d of digits) {
-               newGivens[`must${i}${j}`] = new Set([d]);
-               mach.guessNum++;
-               if (verbose > 0) {
-                  console.log(margins[mach.depth] + `guessing ${i}x${j} val=${d}/{${digits.array()}} [${mach.guessNum}:${mach.depth}]`); mach.depth+=1;
-               }
+            for (let guess of digits) {
+               newGivens[`must${i}${j}`] = new Set([guess]);
+               guessNum++; if (verbose > 0) { console.log(margins[depth] + `guessing ${i}x${j} val=${guess}/{${digits.array()}} [${guessNum}:${depth}]`); depth+=1; }
                const newSignals = driver(mach, newGivens);
                
                mach.depth-=1;
@@ -291,10 +286,12 @@ const solve = (strategies, board) => {
    const mach = new hh.ReactiveMachine(Sudoku(strategies), { sweep, verbose: parseInt(process.env?.VERBOSE ?? "1") });
    mach.depth = 0;
    mach.guessNum = 0;
-   
-   const givens = initGame(board);
-   displayBoard(givens);
 
+   initMargins(board);
+   const givens = parseBoard(board);
+   displayBoard(givens);
+   initMargins();
+   
    let signals = driver(mach, givens);
 
    if (signals.status === "solved") {
@@ -320,10 +317,11 @@ const solve = (strategies, board) => {
 /*    Run one step and stop.                                           */
 /*---------------------------------------------------------------------*/
 const step = (mach, board, verbose) => {
-   const givens = initGame(board);
+   const givens = parseBoard(board);
    if (verbose) {
       displayBoard(givens);
    }
+   initMargins();
    
    mach.guessNum = 0;
    mach.depth=0;

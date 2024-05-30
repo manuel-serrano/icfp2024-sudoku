@@ -6,23 +6,27 @@ Name: The Functional, the Imperative, and the Sudoku
 
 ## Artifact Instructions
 
-
 This artifact can be installed and ran either:
 
-  1. using the provided VM;
+  1. using the VM availabe at http://xxx.org;
   2. using the a native installation. 
   
-### VM-base artifact
+The VM provides a complete Linux image where a native version
+of the artifact has been pre-installed. 
 
-To execute the artifact, install QEMU and run the virtual machine as
-instructed in Section [QEMU Instructions] (see below). Once
-connected to the VM go into the `icfp-2024` directory and execute:
+### Alternative 1: VM-base artifact
+
+To execute the artifact via the VM distribution, install QEMU and run
+the virtual machine as instructed in Section [QEMU Instructions] (see
+below). Once connected to the VM go into the `icfp-2024`
+directory. It contains a pre-installed native version of
+the artifact (as documented in Section [Native arifact]). To execute it:
 
 ```
 npm run sudoku
 ```
 
-### Native artifact
+### Alternative 2: Native artifact
 
 In order to install the version of the ICFP artifact the following
 packages are required:
@@ -45,9 +49,17 @@ To run the test:
 npm run sudoku
 ```
 
+## The Artifact
+
+This artifact will let you run the HipHop solver and conduct some
+experiments with new puzzles and solver extensions. The objective is
+to help you taste the HipHop programming flavor. For that, first, we
+briefly present the structure and organization of the solver and then
+we suggest three progressive steps to get you started with HipHop.
+
 ### Description of the Sudoku solver
 
-The files composing the artifact are:
+The files composing the HipHop Sudoku solver are:
 
   - `sudoku.hh.mjs`: the Sudoku implementation;
   - `boards9x9.mjs`: a collection of Sudoku boards;
@@ -56,10 +68,16 @@ The files composing the artifact are:
   - `test.hh.mjs`: the test driver;
   - `package.json`: the NPM metadata.
 
-To run the artifact:
+To run the artifact via `npm`:
 
 ```
 npm run sudoku
+```
+
+Alternatively, you can invoke `nodejs` directly without `npm` as follows:
+
+```
+node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs test.hh.mjs
 ```
 
 The HipHop implementation of the Sudoku solver sits in the file
@@ -78,7 +96,7 @@ The HipHop implementation of the Sudoku solver sits in the file
   - `solve`: `HipHopFragment[] x board -> void`
   Create a HipHop machine and apply it to the board.
   - `step`: `HipHopFragment[] x board -> void`
-  As `solve` but only execute one resolution step.
+  As `solve`, but execute only one resolution step.
   
   
 The file `board9x9.mjs` exports some Sudoku problems. Each
@@ -87,9 +105,12 @@ Each character is either a digit between 1 and 9 or
 the character `.`. https://sudoku.com/ is a large Sudoku database
 where many puzzle of different difficulties can be found.
 
-The following is a complete example that shows how to use the Sduoku
-API and how to create a new board and how to solve it using no
-specific strategy (which implies guesses and backtracking):
+### Assignment 1, Solving another puzzle
+
+In this section we show how to use the solver API to create new
+boards and how to solve them using different strategies. 
+
+Open a file named `mypuzzle.mjs` and cut-and-past the following:
 
 ```
 import { solve, SudokuNakedSingle } as s from "./sudoku.hh.mjs";
@@ -108,17 +129,25 @@ const myBoard = `
 solve([], myBoard);
 ```
 
-To solve the puzzle using one of the strategies described in the paper, 
-for instance, the `SudokuNakedSingle` strategy, involve the `solve`
-method with as first argument an array of size 1 containing only
-the strategy, as in:
+Run that program with:
+
+```
+node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs mypuzzle.mjs
+```
+
+To solve the puzzle using one of the strategies described in the
+paper, for instance, the `SudokuNakedSingle` strategy, change the
+invokation of `solve` method with as first argument an array of size 1
+containing only the strategy, as in:
 
 ```
 solve([SudokuNakedSingle], myBoard);
 ```
 
-The Sudoku solver logs information on the standard output port. 
+Run again the program. The execution should require a smaller number
+of reaction, which is visible in the logs the solver generate.
 
+The Sudoku solver logs information on the standard output port. 
 First, when `solve` is called, it displays the strategies it has
 received as parameter as a array of integers, which stand for the
 first character number of each strategy implementation. For instance:
@@ -134,15 +163,15 @@ Where 6871 and 7615 are the character locations of the stategies
 Second, it displays the puzzle to be solved. For instance:
 
 ```
-|4..6.....|
-|..2.3....|
-|.....9827|
-|8..41....|
-|9.......5|
-|.6.....7.|
-|.3....4.6|
-|....962..|
-|.9.....5.|
+|3..6.2..4|
+|....798.3|
+|.1....7..|
+|....6...2|
+|.417.8...|
+|7.6...4..|
+|9.728534.|
+|.8....29.|
+|123.4756.|
 ```
 
 Then, it displays information about each guess and backtracking. When the
@@ -177,8 +206,29 @@ where the cell `(0, 2)` is guess to be `3` and the cell `(0, 1)` to be
 When the solver completes or fails it displays the number of HipHop reactiions
 executed. 
 
+### Assignment 2, Adding a new observer
 
-### Implementing new Strategies
+To start with something simple we propose to add a new observer to the
+Sudoku solver. The `Sudoku` JavaScript constructor generates a HipHop
+solver by running in parallel builtins components and user specified
+_plugins_. The new observer can be implemented as a plugin and
+passed to the constructor as in:
+
+```
+const myObserver = () => hiphop { 
+  pragma { console.log("in myObserver"); }
+}
+
+solve([myObserver], myBoard);
+```
+
+Taking inspiration from the `SudokuObserver` implementation, create
+a new observer that after each reaction displays the percentage
+of resolution, _i.e._, the percentage of cells that emit a `must`
+signal with exactly one value.
+
+
+### Assignment 3, Implementing a new Strategy
 
 The web site https://hodoku.sourceforge.net describes a plethora of
 known strategies that humans commonly use to solve puzzles. Some are
@@ -192,7 +242,15 @@ All HipHop strategies comply with the same protocol:
   1. There are implemented as independent HipHop fragment that run in
   parallel with one another;
   2. They read the `cannot` and `must`;
-  3. They either emit new `cannot`, `new `must`, or both.
+  3. They either emit new `cannot`, new `must`, or both;
+  4. Reading a `must` and emitting a `cannot` can be done in the same
+  reaction;
+  5. Reading a `cannot` and emitting a `must` cannot be done in the same
+  reaction. You must either use a `yield` in between the `cannot` and the
+  `must` or you should read the previous values of the `cannot` for
+  emitting a `must`. See for instance the `SudokuNakedSingle` implementation
+  that uses the expression `this["cannot"+i+j"].preval` for this very
+  reason.
   
 If a strategy has to emit the same sets of signals as the one it reads, 
 in order to avoid causality cycles, it has to `yield` for one reaction.
