@@ -43,7 +43,7 @@ cd icfp2024-sudoku
 npm install
 ```
 
-To run the test:
+To test that the installation worked correctly:
 
 ```
 npm run sudoku
@@ -55,7 +55,7 @@ This artifact will let you run the HipHop solver and conduct some
 experiments with new puzzles and solver extensions. The objective is
 to help you taste the HipHop programming flavor. For that, first, we
 briefly present the structure and organization of the solver and then
-we suggest three progressive steps to get you started with HipHop.
+we suggest three assignments to get you familiar with HipHop.
 
 ### Description of the Sudoku solver
 
@@ -100,7 +100,7 @@ The HipHop implementation of the Sudoku solver sits in the file
   
   
 The file `board9x9.mjs` exports some Sudoku problems. Each
-problem is a JavaScript string of 9 lines or 9 columns.
+problem is a JavaScript string of 9 lines and 9 columns.
 Each character is either a digit between 1 and 9 or
 the character `.`. https://sudoku.com/ is a large Sudoku database
 where many puzzle of different difficulties can be found.
@@ -110,10 +110,10 @@ where many puzzle of different difficulties can be found.
 In this section we show how to use the solver API to create new
 boards and how to solve them using different strategies. 
 
-Open a file named `mypuzzle.mjs` and cut-and-past the following:
+Open a file named `mypuzzle.mjs` and cut-and-paste the following:
 
 ```
-import { solve, SudokuNakedSingle } as s from "./sudoku.hh.mjs";
+import { solve, SudokuNakedSingle } from "./sudoku.hh.mjs";
 
 const myBoard = `
 3..6.2..4
@@ -129,7 +129,7 @@ const myBoard = `
 solve([], myBoard);
 ```
 
-Run that program with:
+Run that program with to solve the puzzle with only guessing, no stratgies:
 
 ```
 node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs mypuzzle.mjs
@@ -144,8 +144,9 @@ containing only the strategy, as in:
 solve([SudokuNakedSingle], myBoard);
 ```
 
-Run again the program. The execution should require a smaller number
-of reaction, which is visible in the logs the solver generate.
+Run again the program. Depending on the puzzle you chose, the
+execution should require a smaller number of reactions, which is
+visible in the logs the solver generate.
 
 The Sudoku solver logs information on the standard output port. 
 First, when `solve` is called, it displays the strategies it has
@@ -187,10 +188,10 @@ guessing 0x1 val=1/{1,5,6,7} [1:0]
 The solver guesses the digit `1` for the cell `(0,1)`. The possible digits
 for that cell are `1, 5, 6, 7`. If selecting `1` does not yield to a 
 puzzle complete resolution, the solver will then try the digit `5`, then
-6, and eventually `7`.
+`6`, and eventually `7`.
 
 The trace contains a visualization of the depth of a guess. A series of
-"." character in the left margin indicates the number of pending guesses.
+`.` characters in the left margin indicate the number of pending guesses.
 For instance:
 
 ```
@@ -203,32 +204,64 @@ means that the digit `7` is explored for the cell `(1, 0)` in a context
 where the cell `(0, 2)` is guess to be `3` and the cell `(0, 1)` to be
 `1`.
 
-When the solver completes or fails it displays the number of HipHop reactiions
+When the solver completes or fails it displays the number of HipHop reactions
 executed. 
 
 ### Assignment 2, Adding a new observer
 
-To start with something simple we propose to add a new observer to the
-Sudoku solver. The `Sudoku` JavaScript constructor generates a HipHop
-solver by running in parallel builtins components and the strategies.
-For this assigment, you should add a new `par` construct to the
-`fork` of the `Sudoku` machine that would implement your
-observer. 
+To start a simple modification to the code, we suggest addding a new
+observer to the Sudoku solver. The `Sudoku` JavaScript constructor in
+sudoku.hh.mjs generates a HipHop solver by running in parallel
+builtins components and the strategies.  For this assigment, you
+should add a new `par` construct to the `fork` inside the `abort
+immediate` (line 56) of the `Sudoku` machine that would implement your
+observer.
 
 For debugging and developping, if you need to generate a trace 
 you can use the Hiphop `pragma` statement as in the following
 example:
 
 ```
-const myObserver = () => hiphop { 
-  pragma { console.log("in myObserver"); }
+pragma {
+   console.log("in my Observer");
 }
 ```
 
-Taking inspiration from the `SudokuObserver` implementation, create
-a new observer that after each reaction displays the percentage
-of resolution, _i.e._, the percentage of cells that emit a `must`
-signal with exactly one value.
+If you run the solver on the same example as in the end of the first
+assignment above, and add that `pragma` in a new `par` branch as
+suggested above, you will see one printout each time the solver
+discovers a bad guess and restarts the solving process, because this
+`par` arm terminates right after printing.
+
+If you wrap it in a `loop` and add a `pause`, like so:
+```
+loop {
+   pragma {
+      console.log("in my Observer");
+   }
+   yield;
+}
+```
+you will see many more printouts, one for each instant that is run.
+
+The content of the `pragma` can be arbitrary JavaScript code, and we
+can use it to access the state of the signals. So we could print out a
+string that is slightly different each time, e.g. telling us the state
+of some specific cells, e.g.
+```
+console.log(this["must33"].nowval, this["must88"].nowval);
+```
+
+With this line, you can see that the bottom-right cell (8,8), is
+determined quickly, but the cell (3,3) is not known quickly and,
+indeed, there are incorrect guesses made about it.
+
+Using these ideas, try to print out the percentage of resolution,
+_i.e._, the percentage of cells that emit a `must` signal with exactly
+one value. JavaScript's string interpolation will be helpful; it lets
+you write `this[\`must${i}${j}\`].nowval` to get a set that is the value
+of the must signal for the cell whose coordinates are determined by
+the JavaScript variables `i` and `j`.
 
 
 ### Assignment 3, Implementing a new Strategy
