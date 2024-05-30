@@ -4,7 +4,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Wed May 29 10:35:32 2024 (serrano)                */
+/*    Last change :  Thu May 30 16:27:04 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -42,7 +42,7 @@ const inconsistent = (must, cannot) => {
 /*    -------------------------------------------------------------    */
 /*    The Sudoku main program generator.                               */
 /*---------------------------------------------------------------------*/
-const Sudoku = plugins => hiphop module() {
+const Sudoku = strategies => hiphop module() {
    inout ... ${iota.flatMap(i => iota.map(j => `must${i}${j}`))} =
       new Set() combine (x, y) => x.union(y);
    inout ... ${iota.flatMap(i => iota.map(j => `cannot${i}${j}`))} =
@@ -60,7 +60,7 @@ const Sudoku = plugins => hiphop module() {
          } par {
             ${SudokuObserver()};
          } par {
-            fork ${plugins}
+            fork ${strategies}
          }
       }
 
@@ -215,18 +215,17 @@ const SudokuHiddenSingle = hiphop ${ForkHouseMap(coords => hiphop {
 const SudokuNakedPair = hiphop ${ForkHouseMap(coords => hiphop {
    fork ${coords.map(c => hiphop {
       loop {
-         let c_cannot = this[`cannot${c.i}${c.j}`].nowval;
+         let c_cannot = this[`cannot${c.i}${c.j}`].preval;
          if (c_cannot.size === digits.size - 2) {
             ${coords
                .filter(d => c.i !== d.i || c.j !== d.j)
                .map(d => hiphop {
-                  let d_cannot = this[`cannot${d.i}${d.j}`].nowval;
+                  let d_cannot = this[`cannot${d.i}${d.j}`].preval;
                   if (c_cannot.equal(d_cannot)) {
                      fork ${coords
                         .filter(e => (e.i !== c.i || e.j !== c.j)
                                   && (e.i !== d.i || e.j !== d.j))
                         .map(e => hiphop {
-                           yield;
                            sustain ${`cannot${e.i}${e.j}`}(
                               digits.difference(c_cannot));
                         })}}})}}
@@ -251,7 +250,7 @@ const driver = (mach, givens) => {
 
             for (let guess of digits) {
                newGivens[`must${i}${j}`] = new Set([guess]);
-               guessNum++; if (verbose > 0) { console.log(margins[depth] + `guessing ${i}x${j} val=${guess}/{${digits.array()}} [${guessNum}:${depth}]`); depth+=1; }
+               mach.guessNum++; if (verbose > 0) { console.log(margins[depth] + `guessing ${i}x${j} val=${guess}/{${digits.array()}} [${mach.guessNum}:${depth}]`); depth+=1; }
                const newSignals = driver(mach, newGivens);
                
                mach.depth-=1;

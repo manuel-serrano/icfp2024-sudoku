@@ -210,16 +210,19 @@ executed.
 
 To start with something simple we propose to add a new observer to the
 Sudoku solver. The `Sudoku` JavaScript constructor generates a HipHop
-solver by running in parallel builtins components and user specified
-_plugins_. The new observer can be implemented as a plugin and
-passed to the constructor as in:
+solver by running in parallel builtins components and the strategies.
+For this assigment, you should add a new `par` construct to the
+`fork` of the `Sudoku` machine that would implement your
+observer. 
+
+For debugging and developping, if you need to generate a trace 
+you can use the Hiphop `pragma` statement as in the following
+example:
 
 ```
 const myObserver = () => hiphop { 
   pragma { console.log("in myObserver"); }
 }
-
-solve([myObserver], myBoard);
 ```
 
 Taking inspiration from the `SudokuObserver` implementation, create
@@ -239,24 +242,18 @@ involved in a strategy. For instance
 
 All HipHop strategies comply with the same protocol:
 
-  1. There are implemented as independent HipHop fragment that run in
+  1. They are implemented as independent HipHop fragment that run in
   parallel with one another;
   2. They read the `cannot` and `must`;
   3. They either emit new `cannot`, new `must`, or both;
   4. Reading a `must` and emitting a `cannot` can be done in the same
   reaction;
-  5. Reading a `cannot` and emitting a `must` cannot be done in the same
-  reaction. You must either use a `yield` in between the `cannot` and the
-  `must` or you should read the previous values of the `cannot` for
-  emitting a `must`. See for instance the `SudokuNakedSingle` implementation
+  5. Other emissions should use the value of the previous instant. See 
+  for instance the `SudokuNakedSingle` implementation
   that uses the expression `this["cannot"+i+j"].preval` for this very
   reason.
   
-If a strategy has to emit the same sets of signals as the one it reads, 
-in order to avoid causality cycles, it has to `yield` for one reaction.
-For instance, the `SudokuNakedPair` strategy reads and emits the `cannot`
-so before any `sustain`, it yields to wait for the next reaction.
-
+  
 ## QEMU Instructions
 
 The ICFP 2024 Artifact Evaluation Process is using a Debian QEMU image as a
