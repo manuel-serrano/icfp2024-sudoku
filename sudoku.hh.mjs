@@ -4,7 +4,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Thu May 30 16:27:04 2024 (serrano)                */
+/*    Last change :  Thu May 30 19:37:19 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -250,10 +250,10 @@ const driver = (mach, givens) => {
 
             for (let guess of digits) {
                newGivens[`must${i}${j}`] = new Set([guess]);
-               mach.guessNum++; if (verbose > 0) { console.log(margins[depth] + `guessing ${i}x${j} val=${guess}/{${digits.array()}} [${mach.guessNum}:${depth}]`); depth+=1; }
+               mach.guessNum++; if (verbose > 0) { console.log(margins[mach.depth] + `guessing ${i}x${j} val=${guess}/{${digits.array()}} [${mach.guessNum}:${mach.depth}]`); mach.depth++; }
                const newSignals = driver(mach, newGivens);
                
-               mach.depth-=1;
+               mach.depth--;
                if (newSignals.status === "solved") {
                   return newSignals;
                } else {
