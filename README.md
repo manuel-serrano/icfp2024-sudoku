@@ -263,6 +263,56 @@ you write `this[\`must${i}${j}\`].nowval` to get a set that is the value
 of the must signal for the cell whose coordinates are determined by
 the JavaScript variables `i` and `j`.
 
+Staging might yield to programmer errors sometime difficult to interpret.
+For instance, let us consider the following JavaScript function that
+builds a single HipHop statement:
+
+```
+const myObserver = () => {
+   return hiphop {
+      pragma {
+         let i = 0;
+         console.log(this[`must${i}${i}`].nowval.size);
+      }
+   }
+}
+```
+
+Inserting the generated `pragma` form would trigger the following error:
+
+```
+/home/serrano/diffusion/article/icfp2024-sudoku/bug.hh.mjs:44
+         console.log(this[`must${i}${i}`].nowval.size);
+                                 ^
+ReferenceError: i is not defined
+    at myObserver (/home/serrano/diffusion/article/icfp2024-sudoku/bug.hh.mjs:44:34)
+```
+
+This is because the variable `i` is only known when the `pragma` form
+executes but to decide when executing that form the HipHop compiler
+needs to calculte the complete list of signal dependencies. For that
+it collects all the signals _syntactically_ mentionned in the
+expression and generates a code that check them, before the reaction
+starts. This is when the error above is triggered.
+
+In short, all HipHop signals used inside a JavaScript statement or expression
+must have named that can be resolved with the HipHop program is compiled.
+For instance, we have to transformed `myObserver` into:
+
+```
+const myObserver = () => {
+   let i = 0;
+   return hiphop {
+      pragma {
+         console.log(this[`must${i}${i}`].nowval.size);
+      }
+   }
+}
+```
+
+Of course, this transformation is not always possible as the two
+versions do not have the same semantics.
+
 
 ### Assignment 3, Implementing a new Strategy
 
