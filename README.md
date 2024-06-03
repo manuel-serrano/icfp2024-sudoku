@@ -233,7 +233,7 @@ suggested above, you will see one printout each time the solver
 discovers a bad guess and restarts the solving process, because this
 `par` arm terminates right after printing.
 
-If you wrap it in a `loop` and add a `pause`, like so:
+If you wrap it in a `loop` and add a `yield`, like so:
 ```
 loop {
    pragma {
