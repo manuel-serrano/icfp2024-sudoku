@@ -259,7 +259,7 @@ indeed, there are incorrect guesses made about it.
 Using these ideas, try to print out the percentage of resolution,
 _i.e._, the percentage of cells that emit a `must` signal with exactly
 one value. JavaScript's string interpolation will be helpful; it lets
-you write `this[\`must${i}${j}\`].nowval` to get a set that is the value
+you write ``this[`must${i}${j}`].nowval`` to get a set that is the value
 of the must signal for the cell whose coordinates are determined by
 the JavaScript variables `i` and `j`.
 
