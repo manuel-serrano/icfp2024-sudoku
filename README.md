@@ -290,8 +290,8 @@ ReferenceError: i is not defined
 
 This is because the variable `i` is only known when the `pragma` form
 executes but to decide when executing that form the HipHop compiler
-needs to calculte the complete list of signal dependencies. For that
-it collects all the signals _syntactically_ mentionned in the
+needs to compute the complete list of signal dependencies. For that
+it collects all the signals _syntactically_ mentioned in the
 expression and generates a code that check them, before the reaction
 starts. This is when the error above is triggered.
 
@@ -313,6 +313,53 @@ const myObserver = () => {
 Of course, this transformation is not always possible as the two
 versions do not have the same semantics.
 
+In some situations, it might be useful to use local variables
+in HipHop fragments, for instance to accumulate values. If a variable
+is assigned in a reaction, the effect of this assignment should not
+be observed from within HipHop during that same reaction. 
+
+Let us imagine that we need to sum all the sizes of the `nowval` of
+cells belonging to the same raw. This can be accomplished by using
+a JavaScript variable bound in a `let` construct and by adding all
+the successive values. For instance:
+
+```
+const sumRaw = (j) => {
+   return hiphop {
+      let sum = 0;
+      pragma { sum += this[`must0${j}`].nowval.size; }
+      pragma { sum += this[`must1${j}`].nowval.size; }
+      pragma { sum += this[`must2${j}`].nowval.size; }
+      pragma { sum += this[`must3${j}`].nowval.size; }
+      pragma { sum += this[`must4${j}`].nowval.size; }
+      pragma { sum += this[`must5${j}`].nowval.size; }
+      pragma { sum += this[`must6${j}`].nowval.size; }
+      pragma { sum += this[`must7${j}`].nowval.size; }
+      pragma { sum += this[`must8${j}`].nowval.size; }
+      pragma { console.log("SUM=", sum); }
+   }
+}
+```
+
+Using staging we can write a more compact version:
+
+```
+const sumRaw = (j) => {
+   return hiphop {
+      let sum = 0;
+	  ${[0,1,2,3,4,5,6,7,8].map(i => {
+	     return pragma { sum += this[`must${i}${j}`].nowval.size; }
+	  });
+      pragma { console.log("SUM=", sum); }
+   }
+}
+```
+
+As you can notice the `[0,1,2,3,4,5,6,7,8].map(i => { ... })` expression
+constructs an array of HipHop fragments. Such an array is flattened by
+the HipHop compiler when elaborating the complete AST of the program
+to be compiled.
+
 
 ### Assignment 3, Implementing a new Strategy
 
@@ -327,13 +374,13 @@ All HipHop strategies comply with the same protocol:
 
   1. They are implemented as independent HipHop fragment that run in
   parallel with one another;
-  2. They read the `cannot` and `must`;
+  2. They read the `must.nowval` and `cannot.preval`;
   3. They either emit new `cannot`, new `must`, or both;
   4. Reading a `must` and emitting a `cannot` can be done in the same
   reaction;
   5. Other emissions should use the value of the previous instant. See 
   for instance the `SudokuNakedSingle` implementation
-  that uses the expression `this["cannot"+i+j"].preval` for this very
+  that uses the expression ``this[`cannot${i]${j}].preval`` for this very
   reason.
   
   
