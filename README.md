@@ -304,12 +304,22 @@ ReferenceError: i is not defined
     at myObserver (/home/serrano/diffusion/article/icfp2024-sudoku/bug.hh.mjs:44:34)
 ```
 
-This is because the variable `i` is only known when the `pragma` form
-executes but to decide when executing that form the HipHop compiler
-needs to compute the complete list of signal dependencies. For that
-it collects all the signals _syntactically_ mentioned in the
-expression and generates a code that check them, before the reaction
-starts. This is when the error above is triggered.
+This is because of staging and of different execution times. With
+HipHop staging, first a JavaScript program _elaborates_ a HipHop
+program, which is then compiled by the HipHop compiler, and then
+executed by a HipHop machine. The error message above is triggered
+at the JavaScript elaboration-time because the variables bound inside
+HipHop statements do not exist yet and cannot be used to
+elaborate the program itself. These variables only exist once HipHop has
+compiled the program.
+
+The HipHop compiler analyses all the embedded JavaScript expressions
+in order to compute their list of signal dependencies.  This resort to
+collecting the name of all the signals used in JavaScript. The HipHop
+analysis is syntactic. It parses the code and collect all the signal
+names. In our error example, it finds the name `must${i}${i}`
+which it cannot resolve because `i` is not bound at that stage. This
+triggers the error.
 
 In short, all HipHop signals used inside a JavaScript statement or expression
 must have named that can be resolved with the HipHop program is compiled.
@@ -363,18 +373,60 @@ Using staging we can write a more compact equivalent version:
 const sumRaw = (j) => {
    return hiphop {
       let sum = 0;
-	  ${[0,1,2,3,4,5,6,7,8].map(i => {
-	     return pragma { sum += this[`must${i}${j}`].nowval.size; }
-	  });
+      ${[0,1,2,3,4,5,6,7,8].map(i => {
+         return pragma { sum += this[`must${i}${j}`].nowval.size; }
+      });
       pragma { console.log("SUM=", sum); }
    }
 }
 ```
 
 As you can notice the `[0,1,2,3,4,5,6,7,8].map(i => { ... })` expression
-constructs an array of HipHop fragments. Such an array is flattened by
-the HipHop compiler when elaborating the complete AST of the program
-to be compiled.
+constructs an array of HipHop fragments, which is inserted in the constructed
+HipHop fragment with a `${...}` construct. The `${}` operator accepts
+either a HipHop fragment or an array of fragments which it flattens 
+to one level. When flattening occurs, the contained fragments are inserted
+in a HipHop sequence, except if the `${}` construct appears immediately
+after the keyword `fork`, in which case, the fragments are all inserted
+in `par` branches. That is,
+
+```
+hiphop {
+  ${[0, 1, 2]}.map(n => hiphop { pragma { console.log(${n}); }})
+}
+```
+
+is equivalent to:
+
+
+```
+hiphop {
+  pragma { console.log(0); }
+  pragma { console.log(1); }
+  pragma { console.log(2); }
+}
+```
+
+And 
+
+```
+hiphop {
+  fork ${[0, 1, 2]}.map(n => hiphop { pragma { console.log(${n}); }})
+}
+```
+
+is equivalent to:
+
+```
+hiphop {
+  fork { 
+     pragma { console.log(0); }
+  } par {
+     pragma { console.log(1); }
+  } par {
+     pragma { console.log(2); }
+}
+```
 
 
 ### Assignment 3, Implementing a new Strategy
