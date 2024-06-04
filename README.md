@@ -110,7 +110,8 @@ where many puzzle of different difficulties can be found.
 In this section we show how to use the solver API to create new
 boards and how to solve them using different strategies. 
 
-Open a file named `mypuzzle.mjs` and cut-and-paste the following:
+In the directory containing `sudoku.hh.mjs, open a file named
+`mypuzzle.mjs` and cut-and-paste the following:
 
 ```
 import { solve, SudokuNakedSingle } from "./sudoku.hh.mjs";

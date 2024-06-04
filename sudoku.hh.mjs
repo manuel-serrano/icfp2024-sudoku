@@ -4,7 +4,7 @@
 /*    -------------------------------------------------------------    */
 /*    Author      :  Manuel Serrano & Robby Findler                    */
 /*    Creation    :  Sat Dec 23 07:16:35 2023                          */
-/*    Last change :  Thu May 30 19:37:19 2024 (serrano)                */
+/*    Last change :  Fri May 31 10:32:12 2024 (serrano)                */
 /*    Copyright   :  2023-24 Manuel Serrano & Robby Findler            */
 /*    -------------------------------------------------------------    */
 /*    Sudoku resolver that can make several guesses when stuck using   */
@@ -183,7 +183,6 @@ const SudokuNakedSingle = hiphop {
       sustain ${`must${i}${j}`}(must);
    })})}};
 
-
 /*---------------------------------------------------------------------*/
 /*    SudokuHiddenSingle ...                                           */
 /*    -------------------------------------------------------------    */
@@ -283,13 +282,12 @@ const solve = (strategies, board) => {
    console.log("strategies", strategies.map(x => x.loc.pos));
    const sweep = false;
    const mach = new hh.ReactiveMachine(Sudoku(strategies), { sweep, verbose: parseInt(process.env?.VERBOSE ?? "1") });
-   mach.depth = 0;
-   mach.guessNum = 0;
 
-   initMargins(board);
    const givens = parseBoard(board);
    displayBoard(givens);
    initMargins();
+   mach.depth = 0;
+   mach.guessNum = 0;
    
    let signals = driver(mach, givens);
 
