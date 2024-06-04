@@ -4,6 +4,19 @@ ICFP 2024 Artifact
 
 Name: The Functional, the Imperative, and the Sudoku
 
+```bibtex
+@article{fs:icfp2024
+  author = {Serrano, Manuel and Robert Bruce Findler},
+  title = {The {F}unction, the {I}imperative, and the {S}udoku: {M}aking
+  {G}ood, {B}ad, and {U}gly {M}ore {T}han the {S}um of {T}heir {P}args ({P}earl)},
+  year = {2024},
+  month = oct,
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  journal = "Proceedings of the ACM on Programming Languages (ICFP)"
+}
+```
+
 ## Artifact Instructions
 
 This artifact can be installed and ran either:
@@ -130,16 +143,17 @@ const myBoard = `
 solve([], myBoard);
 ```
 
-Run that program with to solve the puzzle with only guessing, no stratgies:
+Run that program with to solve the puzzle with only guessing, that is,
+passing no strategies to `solve`:
 
 ```shell
 node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs mypuzzle.mjs
 ```
 
-To solve the puzzle using one of the strategies described in the
-paper, for instance, the `SudokuNakedSingle` strategy, change the
-invokation of `solve` method with as first argument an array of size 1
-containing only the strategy, as in:
+To solve the puzzle using one of the strategies described in Section 5
+of the paper, for instance, the `SudokuNakedSingle` strategy (Section
+5.1), change the invokation of `solve` method with as first argument
+an array of size 1 containing the strategy, as in:
 
 ```javascript
 solve([SudokuNakedSingle], myBoard);
@@ -147,11 +161,11 @@ solve([SudokuNakedSingle], myBoard);
 
 Run again the program. Depending on the puzzle you chose, the
 execution should require a smaller number of reactions, which is
-visible in the logs the solver generate.
+visible in the logs the solver generates.
 
 The Sudoku solver logs information on the standard output port. 
 First, when `solve` is called, it displays the strategies it has
-received as parameter as a array of integers, which stand for the
+received as parameter as an array of integers, which stands for the
 first character number of each strategy implementation. For instance:
 
 ```javascript
@@ -159,7 +173,7 @@ strategies [ 6871, 7615 ]
 ```
 
 Where 6871 and 7615 are the character locations of the stategies 
-`SudokuNakedSingle`, and `SudokuHiddenSingle`.
+`SudokuNakedSingle`, and `SudokuHiddenSingle` in the file `sudoku.hh.mjs`.
 
 
 Second, it displays the puzzle to be solved. For instance:
@@ -178,8 +192,8 @@ Second, it displays the puzzle to be solved. For instance:
 
 Then, it displays information about each guess and backtracking. When the
 solver cannot make any new deduction, it picks the first unknown cell
-and try in sequence all the possibilities for that cell. The trace displayed
-contained the cell coordinate of the guess, the digit selected for that
+and tries in sequence all the possibilities for that cell. The trace displayed
+contains the cell coordinate of the guess, the digit selected for that
 cell, and the set of possibilities for that cell. For instance:
 
 ```
@@ -191,8 +205,8 @@ for that cell are `1, 5, 6, 7`. If selecting `1` does not yield to a
 puzzle complete resolution, the solver will then try the digit `5`, then
 `6`, and eventually `7`.
 
-The trace contains a visualization of the depth of a guess. A series of
-`.` characters in the left margin indicate the number of pending guesses.
+The trace contains a visualization of the depth of a guess. A serie of
+`.` characters in the left margin indicates the number of pending guesses.
 For instance:
 
 ```
@@ -201,9 +215,9 @@ guessing 0x1 val=1/{1,5,6,7} [1:0]
 ..guessing 1x0 val=7/{7,8} [3:2]
 ```
 
-means that the digit `7` is explored for the cell `(1, 0)` in a context
-where the cell `(0, 2)` is guess to be `3` and the cell `(0, 1)` to be
-`1`.
+This trace means that the digit `7` is explored for the cell `(1, 0)`
+in a context where the cell `(0, 2)` is guess to be `3` and the cell
+`(0, 1)` to be `1`.
 
 When the solver completes or fails it displays the number of HipHop reactions
 executed. 
