@@ -143,7 +143,7 @@ const myBoard = `
 solve([], myBoard);
 ```
 
-Run that program with to solve the puzzle with only guessing, that is,
+Run that program to solve the puzzle with only guessing, that is,
 passing no strategies to `solve`:
 
 ```shell
@@ -152,8 +152,8 @@ node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/
 
 To solve the puzzle using one of the strategies described in Section 5
 of the paper, for instance, the `SudokuNakedSingle` strategy (Section
-5.1), change the invokation of `solve` method with as first argument
-an array of size 1 containing the strategy, as in:
+5.1), change the invocation of `solve` method's first argument
+to an array of size 1 containing the strategy:
 
 ```javascript
 solve([SudokuNakedSingle], myBoard);
@@ -205,7 +205,7 @@ for that cell are `1, 5, 6, 7`. If selecting `1` does not yield to a
 puzzle complete resolution, the solver will then try the digit `5`, then
 `6`, and eventually `7`.
 
-The trace contains a visualization of the depth of a guess. A serie of
+The trace contains a visualization of the depth of a guess. A series of
 `.` characters in the left margin indicates the number of pending guesses.
 For instance:
 
@@ -216,7 +216,7 @@ guessing 0x1 val=1/{1,5,6,7} [1:0]
 ```
 
 This trace means that the digit `7` is explored for the cell `(1, 0)`
-in a context where the cell `(0, 2)` is guess to be `3` and the cell
+in a context where the cell `(0, 2)` is guessed to be `3` and the cell
 `(0, 1)` to be `1`.
 
 When the solver completes or fails it displays the number of HipHop reactions
@@ -367,7 +367,7 @@ const sumRaw = (j) => {
 }
 ```
 
-Using staging we can write a more compact equivalent version:
+Using staging we can write a more compact, but equivalent version:
 
 ```
 const sumRaw = (j) => {
@@ -433,7 +433,7 @@ hiphop {
 
 The web site https://hodoku.sourceforge.net describes a plethora of
 known strategies that humans commonly use to solve puzzles. Some are
-easier to implement than other. The complexity of the implementation
+easier to implement than others. The complexity of the implementation
 is generally coming from the number of houses or cells that are
 involved in a strategy. For instance 
 [Locked Candidates Type 1](https://hodoku.sourceforge.net/en/tech_intersections.php) should be relatively simple to implement while [Complex Fish](https://hodoku.sourceforge.net/en/tech_fishc.php) are likely to be much harder.
@@ -442,7 +442,7 @@ All HipHop strategies must comply with the following protocol:
 
   1. They are implemented as independent HipHop fragment that run in
   parallel with one another;
-  2. They read the `must.nowval` and `cannot.preval` values;
+  2. They read `must.nowval` and `cannot.preval`, but not `cannot.nowval`;
   3. They either emit new `cannot`, new `must`, or both;
   4. Reading a `must` and emitting a `cannot` can be done in the same
   reaction;
