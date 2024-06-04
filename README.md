@@ -5,10 +5,10 @@ ICFP 2024 Artifact
 Name: The Functional, the Imperative, and the Sudoku
 
 ```bibtex
-@article{fs:icfp2024
+@article{icfp2024
   author = {Serrano, Manuel and Robert Bruce Findler},
-  title = {The {F}unction, the {I}imperative, and the {S}udoku: {M}aking
-  {G}ood, {B}ad, and {U}gly {M}ore {T}han the {S}um of {T}heir {P}args ({P}earl)},
+  title = {The {F}unctional, the {I}imperative, and the {S}udoku: {M}aking
+  {G}ood, {B}ad, and {U}gly {M}ore {T}han the {S}um of {T}heir {P}arts ({P}earl)},
   year = {2024},
   month = oct,
   publisher = {Association for Computing Machinery},
@@ -21,7 +21,7 @@ Name: The Functional, the Imperative, and the Sudoku
 
 This artifact can be installed and ran either:
 
-  1. using the VM availabe at http://xxx.org;
+  1. using the VM available at http://xxx.org;
   2. using the a native installation. 
   
 The VM provides a complete Linux image where a native version
@@ -357,7 +357,7 @@ const sumRaw = (j) => {
 }
 ```
 
-Using staging we can write a more compact version:
+Using staging we can write a more compact equivalent version:
 
 ```
 const sumRaw = (j) => {
@@ -381,22 +381,22 @@ to be compiled.
 
 The web site https://hodoku.sourceforge.net describes a plethora of
 known strategies that humans commonly use to solve puzzles. Some are
-either to implement than other. The complexity of the implementation
+easier to implement than other. The complexity of the implementation
 is generally coming from the number of houses or cells that are
 involved in a strategy. For instance 
 [Locked Candidates Type 1](https://hodoku.sourceforge.net/en/tech_intersections.php) should be relatively simple to implement while [Complex Fish](https://hodoku.sourceforge.net/en/tech_fishc.php) are likely to be much harder.
 
-All HipHop strategies comply with the same protocol:
+All HipHop strategies must comply with the following protocol:
 
   1. They are implemented as independent HipHop fragment that run in
   parallel with one another;
-  2. They read the `must.nowval` and `cannot.preval`;
+  2. They read the `must.nowval` and `cannot.preval` values;
   3. They either emit new `cannot`, new `must`, or both;
   4. Reading a `must` and emitting a `cannot` can be done in the same
   reaction;
   5. Other emissions should use the value of the previous instant. See 
-  for instance the `SudokuNakedSingle` implementation
-  that uses the expression ``this[`cannot${i]${j}].preval`` for this very
+  for instance the `SudokuNakedSingle` (Section 5.1) implementation
+  that uses the expression ``this[`cannot${i]${j}`].preval`` for this very
   reason.
   
   
