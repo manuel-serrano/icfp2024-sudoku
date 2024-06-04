@@ -22,7 +22,7 @@ below). Once connected to the VM go into the `icfp-2024`
 directory. It contains a pre-installed native version of
 the artifact (as documented in Section [Native arifact]). To execute it:
 
-```
+```shell
 npm run sudoku
 ```
 
@@ -45,7 +45,7 @@ npm install
 
 To test that the installation worked correctly:
 
-```
+```shell
 npm run sudoku
 ```
 
@@ -70,13 +70,13 @@ The files composing the HipHop Sudoku solver are:
 
 To run the artifact via `npm`:
 
-```
+```shell
 npm run sudoku
 ```
 
 Alternatively, you can invoke `nodejs` directly without `npm` as follows:
 
-```
+```shell
 node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs test.hh.mjs
 ```
 
@@ -110,10 +110,10 @@ where many puzzle of different difficulties can be found.
 In this section we show how to use the solver API to create new
 boards and how to solve them using different strategies. 
 
-In the directory containing `sudoku.hh.mjs, open a file named
+In the directory containing `sudoku.hh.mjs`, open a file named
 `mypuzzle.mjs` and cut-and-paste the following:
 
-```
+```javascript
 import { solve, SudokuNakedSingle } from "./sudoku.hh.mjs";
 
 const myBoard = `
@@ -132,7 +132,7 @@ solve([], myBoard);
 
 Run that program with to solve the puzzle with only guessing, no stratgies:
 
-```
+```shell
 node --enable-source-maps --no-warnings --loader ./node_modules/@hop/hiphop/lib/hiphop-loader.mjs mypuzzle.mjs
 ```
 
@@ -141,7 +141,7 @@ paper, for instance, the `SudokuNakedSingle` strategy, change the
 invokation of `solve` method with as first argument an array of size 1
 containing only the strategy, as in:
 
-```
+```javascript
 solve([SudokuNakedSingle], myBoard);
 ```
 
@@ -154,7 +154,7 @@ First, when `solve` is called, it displays the strategies it has
 received as parameter as a array of integers, which stand for the
 first character number of each strategy implementation. For instance:
 
-```
+```javascript
 strategies [ 6871, 7615 ]
 ```
 
@@ -249,6 +249,7 @@ The content of the `pragma` can be arbitrary JavaScript code, and we
 can use it to access the state of the signals. So we could print out a
 string that is slightly different each time, e.g. telling us the state
 of some specific cells, e.g.
+
 ```
 console.log(this["must33"].nowval, this["must88"].nowval);
 ```
