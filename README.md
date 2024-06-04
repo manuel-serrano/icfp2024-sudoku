@@ -6,7 +6,7 @@ Name: The Functional, the Imperative, and the Sudoku
 
 ```bibtex
 @article{icfp2024
-  author = {Serrano, Manuel and Robert Bruce Findler},
+  author = {Serrano, Manuel and Findler, Robert Bruce},
   title = {The {F}unctional, the {I}imperative, and the {S}udoku: {M}aking
   {G}ood, {B}ad, and {U}gly {M}ore {T}han the {S}um of {T}heir {P}arts ({P}earl)},
   year = {2024},
