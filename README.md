@@ -66,13 +66,13 @@ npm run sudoku
 
 This artifact will let you run the HipHop solver and conduct some
 experiments with new puzzles and solver extensions. The objective is
-to help you taste the HipHop programming flavor. For that, first, we
+to offer you a taste of programming in HipHop. For that, first, we
 briefly present the structure and organization of the solver and then
-we suggest three assignments to get you familiar with HipHop.
+we suggest three assignments to get you familiar with HipHop and the codebase.
 
 ### Description of the Sudoku solver
 
-The files composing the HipHop Sudoku solver are:
+The files comprising the HipHop Sudoku solver are:
 
   - `sudoku.hh.mjs`: the Sudoku implementation;
   - `boards9x9.mjs`: a collection of Sudoku boards;
@@ -101,15 +101,14 @@ The HipHop implementation of the Sudoku solver sits in the file
   program that implements a sudoku solver. It takes as input
   an array of `strategies` and its returns a HipHop fragment
   that is to be installed in a HipHop machine for reactions.
-  - `SudokuNakedSingle`: `HipHopFragment`
-  - `SudokuHiddenSingle`: `HipHopFragment`
-  - `SudokuNakedPair`: `HipHopFragment`
-  These are the three Sudoku strategies described in the
-  ICFP paper.
+  - The three Sudoku strategies described in the ICFP paper.
+    - `SudokuNakedSingle`: `HipHopFragment`
+    - `SudokuHiddenSingle`: `HipHopFragment`
+    - `SudokuNakedPair`: `HipHopFragment`
   - `solve`: `HipHopFragment[] x board -> void`
-  Create a HipHop machine and apply it to the board.
+  Creates a HipHop machine and applies it to the board.
   - `step`: `HipHopFragment[] x board -> void`
-  As `solve`, but execute only one resolution step.
+  Like `solve`, but executes only one step.
   
   
 The file `board9x9.mjs` exports some Sudoku problems. Each
