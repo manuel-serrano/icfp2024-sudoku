@@ -114,8 +114,10 @@ The HipHop implementation of the Sudoku solver sits in the file
 The file `board9x9.mjs` exports some Sudoku problems. Each
 problem is a JavaScript string of 9 lines and 9 columns.
 Each character is either a digit between 1 and 9 or
-the character `.`. https://sudoku.com/ is a large Sudoku database
-where many puzzle of different difficulties can be found.
+the character `.`. The [Sudoku Exchange Puzzle
+Bank](https://github.com/grantm/sudoku-exchange-puzzle-bank)
+is a large Sudoku puzzle database consisting of puzzles
+in the public domain.
 
 ### Assignment 1, Solving another puzzle
 
@@ -190,8 +192,8 @@ Second, it displays the puzzle to be solved. For instance:
 ```
 
 Then, it displays information about each guess and backtracking. When the
-solver cannot make any new deduction, it picks the first unknown cell
-and tries in sequence all the possibilities for that cell. The trace displayed
+solver cannot make any new deductions, it picks the first unknown cell
+and tries, in sequence, all the possibilities for that cell. The trace displayed
 contains the cell coordinate of the guess, the digit selected for that
 cell, and the set of possibilities for that cell. For instance:
 
@@ -223,15 +225,17 @@ executed.
 
 ### Assignment 2, Adding a new observer
 
-To start a simple modification to the code, we suggest addding a new
-observer to the Sudoku solver. The `Sudoku` JavaScript constructor in
+This assignment digs a bit deeper into the code, showing how to monitor
+the execution of the solver from the inside.
+
+The `Sudoku` JavaScript constructor in
 sudoku.hh.mjs generates a HipHop solver by running in parallel
 builtins components and the strategies.  For this assigment, you
 should add a new `par` construct to the `fork` inside the `abort
 immediate` (line 56) of the `Sudoku` machine that would implement your
 observer.
 
-For debugging and developping, if you need to generate a trace 
+For debugging and developing, if you need to generate a trace 
 you can use the Hiphop `pragma` statement as in the following
 example:
 
@@ -278,7 +282,7 @@ you write ``this[`must${i}${j}`].nowval`` to get a set that is the value
 of the must signal for the cell whose coordinates are determined by
 the JavaScript variables `i` and `j`.
 
-Staging might yield to programmer errors sometime difficult to interpret.
+Staging can lead to errors that are sometimes difficult to interpret.
 For instance, let us consider the following JavaScript function that
 builds a single HipHop statement:
 
@@ -293,14 +297,14 @@ const myObserver = () => {
 }
 ```
 
-Inserting the generated `pragma` form would trigger the following error:
+Inserting this `pragma` form triggers the following error:
 
 ```
-/home/serrano/diffusion/article/icfp2024-sudoku/bug.hh.mjs:44
+/path/to/icfp2024-sudoku/bug.hh.mjs:44
          console.log(this[`must${i}${i}`].nowval.size);
                                  ^
 ReferenceError: i is not defined
-    at myObserver (/home/serrano/diffusion/article/icfp2024-sudoku/bug.hh.mjs:44:34)
+    at myObserver (/path/to/icfp2024-sudoku/bug.hh.mjs:44:34)
 ```
 
 This is because of staging and of different execution times. With
@@ -309,7 +313,7 @@ program, which is then compiled by the HipHop compiler, and then
 executed by a HipHop machine. The error message above is triggered
 at the JavaScript elaboration-time because the variables bound inside
 HipHop statements do not exist yet and cannot be used to
-elaborate the program itself. These variables only exist once HipHop has
+elaborate the program itself. These variables exist only after HipHop has
 compiled the program.
 
 The HipHop compiler analyses all the embedded JavaScript expressions
@@ -322,7 +326,8 @@ triggers the error.
 
 In short, all HipHop signals used inside a JavaScript statement or expression
 must have named that can be resolved with the HipHop program is compiled.
-For instance, we have to transformed `myObserver` into:
+For instance, if we lift the definition of `i` out to the stage where we
+are building the HipHop ast, it will then succeed:
 
 ```
 const myObserver = () => {
@@ -335,8 +340,11 @@ const myObserver = () => {
 }
 ```
 
-Of course, this transformation is not always possible as the two
-versions do not have the same semantics.
+Of course, this transformation is not always possible, for two reasons.
+Despite the syntactic similarity between HipHop's version of Esterel,
+it does not have the same semantics as JavaScript. Also, it may be that
+the computation depends on values that are known only when the
+Esterel code runs and so cannot be lifted out to the enclosing JavaScript.
 
 In some situations, it might be useful to use local variables
 in HipHop fragments, for instance to accumulate values. If a variable
@@ -344,7 +352,7 @@ is assigned in a reaction, the effect of this assignment should not
 be observed from within HipHop during that same reaction. 
 
 Let us imagine that we need to sum all the sizes of the `nowval` of
-cells belonging to the same raw. This can be accomplished by using
+cells belonging to the same row. This can be accomplished by using
 a JavaScript variable bound in a `let` construct and by adding all
 the successive values. For instance:
 
@@ -366,7 +374,8 @@ const sumRaw = (j) => {
 }
 ```
 
-Using staging we can write a more compact, but equivalent version:
+We can move the `$` out so that it is around the entire `pragma` to
+write a more compact, but equivalent version:
 
 ```
 const sumRaw = (j) => {
@@ -384,7 +393,7 @@ As you can notice the `[0,1,2,3,4,5,6,7,8].map(i => { ... })` expression
 constructs an array of HipHop fragments, which is inserted in the constructed
 HipHop fragment with a `${...}` construct. The `${}` operator accepts
 either a HipHop fragment or an array of fragments which it flattens 
-to one level. When flattening occurs, the contained fragments are inserted
+(but only one level). When flattening occurs, the contained fragments are inserted
 in a HipHop sequence, except if the `${}` construct appears immediately
 after the keyword `fork`, in which case, the fragments are all inserted
 in `par` branches. That is,
@@ -435,7 +444,7 @@ known strategies that humans commonly use to solve puzzles. Some are
 easier to implement than others. The complexity of the implementation
 is generally coming from the number of houses or cells that are
 involved in a strategy. For instance 
-[Locked Candidates Type 1](https://hodoku.sourceforge.net/en/tech_intersections.php) should be relatively simple to implement while [Complex Fish](https://hodoku.sourceforge.net/en/tech_fishc.php) are likely to be much harder.
+[Locked Candidates Type 1](https://hodoku.sourceforge.net/en/tech_intersections.php) should be relatively simple to implement while [Complex Fish](https://hodoku.sourceforge.net/en/tech_fishc.php) is likely to be much harder.
 
 All HipHop strategies must comply with the following protocol:
 
