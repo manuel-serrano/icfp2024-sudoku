@@ -3,7 +3,10 @@ ICFP 2024 Artifact
 ![branch workflow](https://github.com/manuel-serrano/icfp2024-sudoku/actions/workflows/icfp2024-sudoku.yml/badge.svg)
 
 Name: The Functional, the Imperative, and the Sudoku
+
 DOI: 10.5281/zenodo.11481893
+URL: https://zenodo.org/records/11481893
+
 
 ```bibtex
 @article{icfp2024
@@ -22,7 +25,7 @@ DOI: 10.5281/zenodo.11481893
 
 This artifact can be installed and ran either:
 
-  1. using the VM available at http://xxx.org;
+  1. using the VM available at https://zenodo.org/;
   2. using the a native installation. 
   
 The VM provides a complete Linux image where a native version
