@@ -3,6 +3,7 @@ ICFP 2024 Artifact
 ![branch workflow](https://github.com/manuel-serrano/icfp2024-sudoku/actions/workflows/icfp2024-sudoku.yml/badge.svg)
 
 Name: The Functional, the Imperative, and the Sudoku
+DOI: 10.5281/zenodo.11481893
 
 ```bibtex
 @article{icfp2024
