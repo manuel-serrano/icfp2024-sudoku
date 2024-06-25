@@ -25,7 +25,7 @@ URL: https://zenodo.org/records/11481893
 
 This artifact can be installed and ran either:
 
-  1. using the VM available at https://zenodo.org/;
+  1. using the VM available at https://zenodo.org/records/11481893;
   2. using the a native installation. 
   
 The VM provides a complete Linux image where a native version
