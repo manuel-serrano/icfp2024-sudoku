@@ -4,8 +4,8 @@ ICFP 2024 Artifact
 
 Name: The Functional, the Imperative, and the Sudoku
 
-DOI: 10.5281/zenodo.11481893
-URL: https://zenodo.org/records/11481893
+  * DOI: 10.5281/zenodo.11481893
+  * URL: https://zenodo.org/records/11481893
 
 
 ```bibtex
