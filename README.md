@@ -72,7 +72,8 @@ This artifact will let you run the HipHop solver and conduct some
 experiments with new puzzles and solver extensions. The objective is
 to offer you a taste of programming in HipHop. For that, first, we
 briefly present the structure and organization of the solver and then
-we suggest three assignments to get you familiar with HipHop and the codebase.
+we suggest three assignments to get you familiar with HipHop and the
+codebase.
 
 ### Description of the Sudoku solver
 
@@ -123,6 +124,14 @@ Bank](https://github.com/grantm/sudoku-exchange-puzzle-bank)
 is a large Sudoku puzzle database consisting of puzzles
 in the public domain.
 
+> [!NOTE]
+> For ease of editing with the emacs editor, the file `sudoku.hh.mjs`
+> if _self-configured_ using a mode-line declaration in its first
+> line. When opening it with emacs, this  may trigger the warning message
+> "The local variables list in sudoku.hh.mjs  contains values that may not 
+> be safe." This warning can be safely ignored but if you don't feel 
+> comfortable with it, simply delete the first line of the file.
+
 ### Assignment 1, Solving another puzzle
 
 In this section we show how to use the solver API to create new
@@ -168,7 +177,7 @@ Run again the program. Depending on the puzzle you chose, the
 execution should require a smaller number of reactions, which is
 visible in the logs the solver generates.
 
-The Sudoku solver logs information on the standard output port. 
+The Sudoku solver logs information on the standard output port.
 First, when `solve` is called, it displays the strategies it has
 received as parameter as an array of integers, which stands for the
 first character number of each strategy implementation. For instance:
@@ -195,11 +204,12 @@ Second, it displays the puzzle to be solved. For instance:
 |123.4756.|
 ```
 
-Then, it displays information about each guess and backtracking. When the
-solver cannot make any new deductions, it picks the first unknown cell
-and tries, in sequence, all the possibilities for that cell. The trace displayed
-contains the cell coordinate of the guess, the digit selected for that
-cell, and the set of possibilities for that cell. For instance:
+Then, it displays information about each guess and backtracking. When
+the solver cannot make any new deductions, it picks the first unknown
+cell and tries, in sequence, all the possibilities for that cell. The
+trace displayed contains the cell coordinate of the guess, the digit
+selected for that cell, and the set of possibilities for that
+cell. For instance:
 
 ```
 guessing 0x1 val=1/{1,5,6,7} [1:0]
@@ -224,20 +234,19 @@ This trace means that the digit `7` is explored for the cell `(1, 0)`
 in a context where the cell `(0, 2)` is guessed to be `3` and the cell
 `(0, 1)` to be `1`.
 
-When the solver completes or fails it displays the number of HipHop reactions
-executed. 
+When the solver completes or fails it displays the number of HipHop
+reactions executed.
 
 ### Assignment 2, Adding a new observer
 
-This assignment digs a bit deeper into the code, showing how to monitor
-the execution of the solver from the inside.
+This assignment digs a bit deeper into the code, showing how to
+monitor the execution of the solver from the inside.
 
-The `Sudoku` JavaScript constructor in
-sudoku.hh.mjs generates a HipHop solver by running in parallel
-builtins components and the strategies.  For this assigment, you
-should add a new `par` construct to the `fork` inside the `abort
-immediate` (line 56) of the `Sudoku` machine that would implement your
-observer.
+The `Sudoku` JavaScript constructor in `sudoku.hh.mjs` generates a
+HipHop solver by running in parallel builtins components and the
+strategies.  For this assigment, you should add a new `par` construct
+to the `fork` inside the `abort immediate` (line 56) of the `Sudoku`
+machine that would implement your observer.
 
 For debugging and developing, if you need to generate a trace 
 you can use the Hiphop `pragma` statement as in the following
@@ -256,6 +265,7 @@ discovers a bad guess and restarts the solving process, because this
 `par` arm terminates right after printing.
 
 If you wrap it in a `loop` and add a `yield`, like so:
+
 ```
 loop {
    pragma {
@@ -264,12 +274,14 @@ loop {
    yield;
 }
 ```
+
 you will see many more printouts, one for each instant that is run.
 
 The content of the `pragma` can be arbitrary JavaScript code, and we
-can use it to access the state of the signals. So we could print out a
-string that is slightly different each time, e.g. telling us the state
-of some specific cells, e.g.
+can use it to access the state of the signals, as does any HipHop form
+that evaluates expressions (`if` and `abort` tests, `emit` values,
+...). So we could print out a string that is slightly different each
+time, e.g. telling us the state of some specific cells, e.g.
 
 ```
 console.log(this["must33"].nowval, this["must88"].nowval);
@@ -314,22 +326,34 @@ ReferenceError: i is not defined
 This is because of staging and of different execution times. With
 HipHop staging, first a JavaScript program _elaborates_ a HipHop
 program, which is then compiled by the HipHop compiler, and then
-executed by a HipHop machine. The error message above is triggered
-at the JavaScript elaboration-time because the variables bound inside
-HipHop statements do not exist yet and cannot be used to
-elaborate the program itself. These variables exist only after HipHop has
-compiled the program.
+executed by a HipHop machine. The error message above is triggered at
+the JavaScript elaboration-time because the variables bound inside
+HipHop statements do not exist yet and cannot be used to elaborate the
+program itself. These variables exist only after HipHop has compiled
+the program.
 
 The HipHop compiler analyses all the embedded JavaScript expressions
 in order to compute their list of signal dependencies.  This resort to
 collecting the name of all the signals used in JavaScript. The HipHop
 analysis is syntactic. It parses the code and collect all the signal
 names. In our error example, it finds the name `must${i}${i}`
-which it cannot resolve because `i` is not bound at that stage. This
-triggers the error.
+which it cannot resolve because `i` is not bound at that stage. For
+that `pragma` form, the HipHop compiler generates a JavaScript expression
+such as
+
+```
+new Pragma(function() { 
+      let i = 0; console.log(this[`must${i}${i}`].nowval.size);
+   }, dependencies([`must${i}${i}])
+);
+```
+
+but in this JavaScript expression, the variable `i` only exists inside
+the `pragma` function body. It does not exist in the dependency
+list. This triggers the error.
 
 In short, all HipHop signals used inside a JavaScript statement or expression
-must have named that can be resolved with the HipHop program is compiled.
+must have names that can be resolved when the HipHop program is compiled.
 For instance, if we lift the definition of `i` out to the stage where we
 are building the HipHop ast, it will then succeed:
 
@@ -344,11 +368,11 @@ const myObserver = () => {
 }
 ```
 
-Of course, this transformation is not always possible, for two reasons.
-Despite the syntactic similarity between HipHop's version of Esterel,
-it does not have the same semantics as JavaScript. Also, it may be that
-the computation depends on values that are known only when the
-Esterel code runs and so cannot be lifted out to the enclosing JavaScript.
+Of course, this transformation is not always possible, for two
+reasons.  Despite the syntactic similarity between HipHop and
+JavaScript, they do not have the same semantics. Also, it may be that
+the computation depends on values that are known only when the HipHop
+code runs and so cannot be lifted out to the enclosing JavaScript.
 
 In some situations, it might be useful to use local variables
 in HipHop fragments, for instance to accumulate values. If a variable
