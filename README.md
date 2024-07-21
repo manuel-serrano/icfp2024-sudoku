@@ -243,10 +243,11 @@ This assignment digs a bit deeper into the code, showing how to
 monitor the execution of the solver from the inside.
 
 The `Sudoku` JavaScript constructor in `sudoku.hh.mjs` generates a
-HipHop solver by running in parallel builtins components and the
-strategies.  For this assigment, you should add a new `par` construct
-to the `fork` inside the `abort immediate` (line 56) of the `Sudoku`
-machine that would implement your observer.
+HipHop solver by running in parallel the builtin components (lines 57,
+59, and 61) and the strategies (line 63).  For this assigment, you
+should add a new `par` construct to the `fork` inside the `abort
+immediate` (line 56) of the `Sudoku` machine that implements your
+observer.
 
 For debugging and developing, if you need to generate a trace 
 you can use the Hiphop `pragma` statement as in the following
@@ -332,7 +333,7 @@ HipHop statements do not exist yet and cannot be used to elaborate the
 program itself. These variables exist only after HipHop has compiled
 the program.
 
-The HipHop compiler analyses all the embedded JavaScript expressions
+The HipHop compiler analyzes all the embedded JavaScript expressions
 in order to compute their list of signal dependencies.  This resort to
 collecting the name of all the signals used in JavaScript. The HipHop
 analysis is syntactic. It parses the code and collect all the signal
